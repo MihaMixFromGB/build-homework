@@ -13,34 +13,73 @@ import path from "node:path";
  * Пока что сборщик упрощен, считаем что require из node_modules нет
  */
 
+const bundle_modules = new Map();
+
+const TEMPLATE_MODULES = `
+  const __modules__ = {
+    <MODULES>
+  }
+`;
+const TEMPLATE_MODULE = `
+  '<NAME>': () => {
+    <CODE>
+  }
+`;
+const __REQUIRE__ = `
+  function __require__(module) {
+    return __modules__[module]();
+  }
+`;
+
 /**
  * @param {string} entryPath - путь к entry бандлинга
  */
 export function bundle(entryPath) {
-  const output = resolveDeps(entryPath);
-  return output.reduceRight((result, module) => 
-    resolveModule(module).replace(/require.*/, result), "");
+  buildTreeDeps(entryPath);
+  return __REQUIRE__ + writeModules() + writeEntry(entryPath);
 }
 
-/**
- * Функция для резолва зависимостей
- * Возвращает массив с исходным кодом всех модулей
- * @param {string} entryPath - путь к entry бандлинга
- */
-function resolveDeps(entryPath) {
-  let output = [];
+function buildTreeDeps(entryPath, module) {
   const code = fs.readFileSync(entryPath, "utf-8");
-  output.push(code);
+  bundle_modules.set(module ?? entryPath, code);
 
   if (code.includes("require")) {
     const requireCalls = searchRequireCalls(code);
     requireCalls.forEach((item) => {
-      const modulePath = path.resolve(path.dirname(entryPath), item);
-      output = [...output, ...resolveDeps(modulePath)];
+      const modulePath = resolve(entryPath, item);
+      buildTreeDeps(modulePath, item);
     });
   }
-  
+}
+
+function writeEntry(entryPath) {
+  return addRuntime(bundle_modules.get(entryPath));
+}
+
+function writeModules() {
+  const modules = Array.from(bundle_modules.keys())
+    .slice(1)
+    .map((item) => writeModule(item))
+    .join(",");
+  return TEMPLATE_MODULES.replace(/<MODULES>/, modules);
+}
+
+function writeModule(module) {
+  const code = addRuntime(bundle_modules.get(module));
+  const output = TEMPLATE_MODULE
+    .replace(/<NAME>/, module)
+    .replace(/<CODE>/, code);
   return output;
+}
+
+function resolve(entryPath, module) {
+  return path.resolve(path.dirname(entryPath), module);
+}
+
+function addRuntime(code) {
+  return code
+    .replace(/require/g, "__require__")
+    .replace(/module.exports =/g, "return");;
 }
 
 /**
@@ -52,20 +91,4 @@ function searchRequireCalls(code) {
   return [...code.matchAll(/require\(('|")(.*)('|")\)/g)].map(
     (item) => item[2]
   );
-}
-
-/**
- * Функция для резолва модуле
- * Оборачивает содержимое в IIFE, заменяет module.exports на return 
- * и возвращает результат
- * @param {string} code 
- */
-function resolveModule(code) {
-  const TEMPLATE = `(function() {
-CONTENT
-  })()`;
-
-  const resolvedExports = code.replace(/exports = (.*)/g, "return $1");
-  
-  return TEMPLATE.replace("CONTENT", resolvedExports);
 }
