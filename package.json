@@ -15,6 +15,5 @@
   "workspaces": [
     "tasks/*"
   ],
-  "packageManager": "yarn@4.9.2",
-  "scripts": {}
+  "packageManager": "yarn@4.9.2"
 }
