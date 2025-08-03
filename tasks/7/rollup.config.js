@@ -2,6 +2,8 @@ import html from "@rollup/plugin-html";
 import url from "@rollup/plugin-url";
 import { string } from "rollup-plugin-string";
 
+const publicPath = 'http://localhost:3000/rollup/';
+
 export default {
   input: "./src/rollup-entry.js",
   output: {
@@ -10,6 +12,28 @@ export default {
     assetFileNames: "[name][extname]",
   },
   plugins: [
+    string({
+      include: ["**/*.json", "**/*.ejs"],
+    }),
+    url({
+      limit: 4 * 1024,
+      include: ['**/*.svg'],
+      exclude: ['**/*.inline.svg'],
+      fileName: '[dirname][name][extname]',
+      publicPath,
+    }),
+    url({
+      limit: 0,
+      include: ['**/*.png'],
+      fileName: '[dirname][name][extname]',
+      publicPath
+    }),
+    url({
+      limit: 99 * 1024,
+      include: ['**/*.inline.svg'],
+      fileName: '[dirname][name][extname]',
+      publicPath
+    }),
     html({
       template: ({ files, title }) => {
         const scripts = (files.js || [])
