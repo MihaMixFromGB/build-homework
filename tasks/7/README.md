@@ -13,7 +13,7 @@
 `ad.inline.svg` - инлайн (размер ассета превышает threshold, но всё равно должен заинлайниться)
 `data.json` - импорт в виде текста
 
-Для Rollup используется отдельный [entrypoint](./src/rollup-entry.js) так как он не умеет в `import query`.
+Для Rollup используется отдельный [entrypoint](./src/rollup-entry.js), так как он не умеет в `import query`.
 
 # Проверка
 
