@@ -4,7 +4,6 @@ import commonjs from "@rollup/plugin-commonjs";
 import html from "@rollup/plugin-html";
 import typescript from "@rollup/plugin-typescript";
 import replace from "@rollup/plugin-replace";
-import replace from '@rollup/plugin-replace';
 
 export default {
   input: "src/index.tsx",
