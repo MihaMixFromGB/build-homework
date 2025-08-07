@@ -10,6 +10,14 @@ const config = {
     },
     path: path.resolve(import.meta.dirname, "dist/webpack"),
   },
+  module: {
+    rules: [
+      {
+        test: /\.ya?ml/,
+        loader: path.resolve("./plugins/yaml-loader.js"),
+      },
+    ],
+  },
   experiments: {
     outputModule: true
   }
