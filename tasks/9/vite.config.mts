@@ -1,4 +1,5 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vite';
+import yamlLoader from './plugins/rollup-plugin-yaml.js';
 
 export default defineConfig({
   build: {
@@ -7,6 +8,9 @@ export default defineConfig({
     minify: false,
     rollupOptions: {
       input: './src/index.js'
-    }
+    },
   },
+  plugins: [
+    yamlLoader()
+  ]
 })
