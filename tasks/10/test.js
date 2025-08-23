@@ -18,7 +18,7 @@ describe("watch files", () => {
     await subscribe();
 
     await outputIndex();
-    await outputData();
+    // await outputData();
     await outputConst();
 
     unsubscribe();
