@@ -1,9 +1,19 @@
+import { watch } from "chokidar";
+
 const changedFilesLog = [];
 
 export function getLog() {
   return changedFilesLog;
 }
 
-export async function subscribe() {}
+const watcher = watch("./src");
 
-export function unsubscribe() {}
+export async function subscribe() {
+  watcher.on("change", (path) => {
+    changedFilesLog.push(path);
+  });
+}
+
+export function unsubscribe() {
+  watcher.close();
+}
